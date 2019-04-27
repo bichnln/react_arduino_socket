@@ -28,7 +28,6 @@ let receivingTemp = false;
 let receivingPlayer = false;
 
 
-
 // let on = () => {
 //   port.write('1');
 // }
@@ -73,6 +72,15 @@ io.on('connection', function (socket) {
     // on();
   });
 
+  socket.on('setTemp',  function(data){
+    const value = data.temp;
+    port.write( value + ',');
+  });
+
+  socket.on('command',  function(data){
+    const value = data.command;
+    port.write( value + ',');
+  });
 
 
   //Do something with received serial coms
@@ -101,6 +109,6 @@ app.get('*', function (req, res) {
   res.sendFile(path.join(publicPath, 'index.html'))
 });
 
-server.listen(8000, () => {
+server.listen(8080, () => {
   console.log("Running on local host ");
 });

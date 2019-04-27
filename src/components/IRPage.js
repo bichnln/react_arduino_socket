@@ -11,8 +11,9 @@ class IRPage extends React.Component{
       status: 'off'
     }
     // https://stackoverflow.com/questions/9418697/how-to-unsubscribe-from-a-socket-io-subscription
-    socket.removeAllListeners('fanSubscriber');
     this.socket = io();
+    this.socket.removeAllListeners('fanSubscriber');
+
   }
 
   onClick = (e) => {
@@ -24,16 +25,28 @@ class IRPage extends React.Component{
     // });
   }
 
+
   render() {
     return (
       <div>
-        <h1>Smart Fan Page</h1>
-        <p>{ this.state.temp }</p>
-        <p>{ this.state.status }</p>
-        <button onClick={this.onClick}>Click Me</button>
-        <button onClick={() => {
-          this.props.history.push('/SFpage')
-        }}>Move to SmarfPage </button>
+        <div>
+          <h1>IR Remote Controller</h1>
+          <button onClick={() => {
+            this.props.history.push('/SFpage')
+          }}>Move to SmarfPage </button>
+        </div>
+          <p>Current Player: </p>
+          <p>Game Level: </p>
+          <p>Correct Answer: </p>
+          <p>Combo Count : 1/3 </p>
+          {
+            // I define the current player
+            // I will receive game level
+            // i will recieve correct answer with level
+            // I will receive wrong answer with level
+          }
+
+        <button onClick={this.onClick}>Push To Database</button>
       </div>
     )
   }

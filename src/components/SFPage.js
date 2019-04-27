@@ -11,7 +11,8 @@ class SMPage extends React.Component{
     this.state = {
       currentTemp: 'not set',
       status: 'off',
-      setTemp: '20.00'
+      setTemp: '30.00',
+      command: ''
     }
 
     this.socket = io();
@@ -25,10 +26,10 @@ class SMPage extends React.Component{
         })
       } else {
         this.setState({
-          currentTemp: temp
+          currentTemp: temp,
+          status: 'off'
         })
       }
-
     });
     this.socket.emit('fanSubscriber');
 
@@ -39,24 +40,93 @@ class SMPage extends React.Component{
     console.log('html toggle firing');
     // testing if arduino can recieve data
     // this.socket.emit('click');
-    // axios.post('/fan', {
-    //   temp: 'testing',
-    //   status: 'hello'
-    // });
+    axios.post('/fan', {
+      temp: this.state.currentTemp,
+      status: this.state.status
+    });
+  }
+
+  onCommandText = (e) => {
+    const command = e.target.value;
+    this.setState(() => ({
+        command
+      }));
+  }
+
+  onTextInput = (e) => {
+    const setTemp = e.target.value;
+    this.setState(() => ({
+        setTemp
+      }));
+  }
+
+  onSubmit = (e) => {
+    e.preventDefault();
+    if (this.state.currentTemp >= this.state.setTemp) {
+      this.setState(() => ({
+        status: 'on'
+      }))
+    }
+    this.socket.emit('setTemp', {temp: this.state.setTemp});
+  }
+
+  onCommand = (e) => {
+    e.preventDefault();
+    this.socket.emit('command', {command: this.state.command});
   }
 
   render() {
     return (
       <div>
-        <h1>Smart Fan</h1>
-        <p>Current Temp:  { this.state.currentTemp }</p>
-        <p>Fan Trigger Temp: { this.state.setTemp }</p>
-        <p>Fan Status: { this.state.status }</p>
-        <button onClick={this.onClick}>Click Me</button>
-        <button onClick={() => {
-          this.props.history.push('/')
-        }}>Move to IRPage </button>
+          <div className="content-container">
+            <div className="page-header">
+              <h1 className="page-header__title">Smart Fan Controller</h1>
+              <button onClick={() => {
+                this.props.history.push('/')
+              }}>Move to IR Remote Controller </button>
+            </div>
+          </div>
 
+          <div className="content-container">
+          {
+            <button onClick={this.turnOnFan} > Turn on </button>
+          }
+
+          <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Current Temp: </td>
+              <td>{ this.state.currentTemp }</td>
+            </tr>
+            <tr>
+              <td>Threshold Temp: </td>
+              <td>{ this.state.setTemp } </td>
+              <td>{ this.state.status } </td>
+            </tr>
+             <tr>
+              <td>Fan Status: </td>
+              <td>{ this.state.status } </td>
+            </tr>
+          </tbody>
+        </table>
+
+
+          <button onClick={this.onClick}>Submit Current Temp to Database</button>
+
+
+          <form action="onSubmit">
+            <input type="text" onChange={this.onTextInput} value={this.state.setTemp} id=""/>
+            <button onClick={this.onSubmit} > Submit Changes to Arduino </button>
+            <input type="text" onChange={this.onCommandText} value={this.state.command} id=""/>
+            <button onClick={this.onCommand} > Submit COmmand </button>
+          </form>
+        </div>
       </div>
     )
   }
