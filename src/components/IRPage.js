@@ -7,37 +7,65 @@ class IRPage extends React.Component{
     super(props);
 
     this.state = {
-      temp: '9000',
-      status: 'off'
+      current: 'james',
+      level: '0',
+      answer: '0',
+      players: [{
+        _id: '1',
+        name: 'player',
+        level: '1'
+      }],
+      names: [
+        'james', 'eamon', 'june', 'mitch'
+      ]
     }
     // https://stackoverflow.com/questions/9418697/how-to-unsubscribe-from-a-socket-io-subscription
     this.socket = io();
     this.socket.removeAllListeners('fanSubscriber');
 
+    axios.get('/player')
+    .then((response) => {
+       console.log('response ', response.data);
+          this.setState(({
+            players: response.data
+          }));
+    })
+    .catch((e) => {
+      console.log('Something went wrong fetching /player: ', e);
+    });
   }
 
   onClick = (e) => {
     this.socket.emit('on', {my: 'data'});
     console.log('html toggle firing');
-    // axios.post('/fan', {
-    //   temp: 'testing',
-    //   status: 'hello'
-    // });
+
+  }
+
+  onDropDownChange = (e) => {
+    if (e.target.value !== '') {
+      this.setState({
+        current: e.target.value
+      })
+    }
   }
 
 
   render() {
     return (
       <div>
-        <div>
-          <h1>IR Remote Controller</h1>
-          <button onClick={() => {
-            this.props.history.push('/SFpage')
-          }}>Move to SmarfPage </button>
+        <div className="content-container">
+        <div className="page-header">
+            <h1 className="page-header__title">IR Remote Controller</h1>
+            <button onClick={() => {
+              this.props.history.push('/SFpage')
+            }}>Move to Smart Fan Page </button>
+          </div>
         </div>
-          <p>Current Player: </p>
-          <p>Game Level: </p>
-          <p>Correct Answer: </p>
+        <div className="content-container">
+
+          <p>Current Player: {this.state.current}</p>
+          <p>Game Level: {this.state.level}</p>
+          <p>Correct Answer: {this.state.answer} </p>
           <p>Combo Count : 1/3 </p>
           {
             // I define the current player
@@ -47,6 +75,38 @@ class IRPage extends React.Component{
           }
 
         <button onClick={this.onClick}>Push To Database</button>
+        </div>
+
+        <div className="content-container">
+          <h3>Select player</h3>
+          <select id="selectPlayer" onChange={this.onDropDownChange}>
+            {
+              this.state.names.map((name) => (
+                <option
+                  key={name}
+                  name={name}
+                  id={name}
+                  value={name}
+                >
+                {name}
+                </option>
+                ))
+            }
+          </select>
+
+          <div>
+            <h3>Past Games Played</h3>
+            {
+              this.state.players.map((player, index) => (
+                  <div className="list-item" key={index}>
+                    <p>player: {player.name}</p>
+                    <p>level reached: {player.level}</p>
+                  </div>
+                ))
+            }
+            </div>
+        </div>
+
       </div>
     )
   }

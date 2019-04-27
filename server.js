@@ -1,6 +1,7 @@
 /* eslint-disable */
 const {mongoose} = require('./server/mongoose');
 const {Fan} = require('./server/fan');
+const {Player} = require('./server/player');
 const {ObjectId} = require('mongodb');
 const bodyParser = require('body-parser');
 const SerialPort = require('serialport')
@@ -19,7 +20,6 @@ var io = socketIO(server);
 app.use(express.static(publicPath));
 app.use(bodyParser.json());
 port.pipe(parser)
-
 
 // Socket IO
 // Allows us to send & receive data directly to the website
@@ -98,6 +98,26 @@ app.post('/fan', (req, res) => {
   });
 
   fan.save().then((doc) => {
+      res.send(doc);
+  }, (e) => {
+      res.status(400).send(e);
+  });
+});
+
+app.get('/player', (req, res) => {
+  Player.find().then((players) => {
+    res.send(players);
+  })
+})
+
+app.post('/player', (req, res) => {
+  console.log(req.body);
+  var player = new Player({
+      name: req.body.name,
+      level: req.body.level
+  });
+
+  player.save().then((doc) => {
       res.send(doc);
   }, (e) => {
       res.status(400).send(e);

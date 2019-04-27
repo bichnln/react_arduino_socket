@@ -81,6 +81,6 @@
     "import/prefer-default-export": 1,
     "react/destructuring-assignment": 0,
     "react/button-has-type": 0,
-    "react/no-unused-state": "warn"
+    "react/no-unused-state": "0"
   }
 }

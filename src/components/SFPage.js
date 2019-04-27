@@ -88,44 +88,46 @@ class SMPage extends React.Component{
           </div>
 
           <div className="content-container">
-          {
-            <button onClick={this.turnOnFan} > Turn on </button>
-          }
 
-          <table>
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th>Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Current Temp: </td>
-              <td>{ this.state.currentTemp }</td>
-            </tr>
-            <tr>
-              <td>Threshold Temp: </td>
-              <td>{ this.state.setTemp } </td>
-              <td>{ this.state.status } </td>
-            </tr>
-             <tr>
-              <td>Fan Status: </td>
-              <td>{ this.state.status } </td>
-            </tr>
-          </tbody>
-        </table>
+              <table>
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Current Temp: </td>
+                  <td>{ this.state.currentTemp }</td>
+                </tr>
+                <tr>
+                  <td>Threshold Temp: </td>
+                  <td>{ this.state.setTemp } </td>
+                </tr>
+                <tr>
+                  <td>Fan Status: </td>
+                  <td>{ this.state.status } </td>
+                </tr>
+              </tbody>
+            </table>
 
 
-          <button onClick={this.onClick}>Submit Current Temp to Database</button>
+              <form action="onSubmit">
 
+                <div>
+                <input type="text" onChange={this.onTextInput} value={this.state.setTemp} id=""/>
+                <button className="button" onClick={this.onSubmit} > SetT </button>
+                </div>
+                <div>
+                <input type="text" onChange={this.onCommandText} value={this.state.command} id=""/>
+                <button className="button" onClick={this.onCommand} > Cmd </button>
+                </div>
+                <div>
+                <button className="button" onClick={this.onClick}> UpdateDB </button>
+                </div>
 
-          <form action="onSubmit">
-            <input type="text" onChange={this.onTextInput} value={this.state.setTemp} id=""/>
-            <button onClick={this.onSubmit} > Submit Changes to Arduino </button>
-            <input type="text" onChange={this.onCommandText} value={this.state.command} id=""/>
-            <button onClick={this.onCommand} > Submit COmmand </button>
-          </form>
+              </form>
         </div>
       </div>
     )
