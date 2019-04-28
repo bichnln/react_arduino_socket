@@ -23,6 +23,30 @@ class IRPage extends React.Component{
     this.socket = io();
     this.socket.removeAllListeners('fanSubscriber');
 
+    this.socket.on('answer', (data) => {
+      console.log(data);
+        this.setState({
+          answer: data,
+        })
+    });
+    this.socket.emit('answerSubscriber');
+
+    this.socket.on('correct', (data) => {
+      console.log(data);
+        this.setState({
+          level: data,
+        })
+    });
+    this.socket.emit('correctSubscriber');
+
+    this.socket.on('wrong', (data) => {
+      console.log(data);
+        this.setState({
+          level: data,
+        })
+    });
+    this.socket.emit('wrongSubcriber');
+
     axios.get('/player')
     .then((response) => {
        console.log('response ', response.data);
@@ -36,8 +60,12 @@ class IRPage extends React.Component{
   }
 
   onClick = (e) => {
-    this.socket.emit('on', {my: 'data'});
-    console.log('html toggle firing');
+    // this.socket.emit('on', {my: 'data'});
+    // console.log('html toggle firing');
+    axios.post('/player',{
+      name: this.state.name,
+      level: this.state.level
+    })
 
   }
 
@@ -74,7 +102,7 @@ class IRPage extends React.Component{
             // I will receive wrong answer with level
           }
 
-        <button onClick={this.onClick}>Push To Database</button>
+        <button onClick={this.onClick}>Save Game Progress</button>
         </div>
 
         <div className="content-container">
@@ -95,7 +123,7 @@ class IRPage extends React.Component{
           </select>
 
           <div>
-            <h3>Past Games Played</h3>
+            <h3>Previously Played</h3>
             {
               this.state.players.map((player, index) => (
                   <div className="list-item" key={index}>

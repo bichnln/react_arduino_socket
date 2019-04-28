@@ -17,6 +17,11 @@ html {
 
 }
 
+h3 {
+  padding-top: 20px;
+  padding-bottom: 5px;
+}
+
 .content-container {
   padding: 20px;
   margin: 1rem;

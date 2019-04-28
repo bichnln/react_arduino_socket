@@ -26,6 +26,9 @@ port.pipe(parser)
 let currentTemp = 0;
 let receivingTemp = false;
 let receivingPlayer = false;
+let correct = 0;
+let wrong = 0;
+let answer = 0;
 
 
 // let on = () => {
@@ -53,15 +56,32 @@ io.on('connection', function (socket) {
   parser.on('data', (recieveData) => {
     console.log('receivedData:', recieveData);
 
-    if (receivingTemp) {
-      currentTemp = recieveData;
-      // console.log(`socket.emit('currentTemp')`);
-      socket.emit('currentTemp', recieveData);
+    let captureData = recieveData.split(':');
+
+    if (captureData[0] == "temp") {
+      socket.emit('currentTemp', captureData[1]);
     }
 
-    if (receivingPlayer) {
-      // i need logic
+    if (captureData[0] == "answer") {
+      socket.emit('currentTemp', captureData[1]);
     }
+
+    if (captureData[0] == "correct") {
+      socket.emit('currentTemp', captureData[1]);
+    }
+
+    if (captureData[0] == "wrong") {
+      socket.emit('currentTemp', captureData[1]);
+    }
+
+    // if (receivingTemp) {
+    //   currentTemp = recieveData;
+    //   // console.log(`socket.emit('currentTemp')`);
+    // }
+
+    // if (receivingPlayer) {
+    //   // i need logic
+    // }
   });
 
   // listen
@@ -69,6 +89,27 @@ io.on('connection', function (socket) {
     console.log("subscribed to current temp", data);
     receivingTemp = true;
     socket.emit('currentTemp', currentTemp);
+    // on();
+  });
+
+  socket.on('answerSubscriber', function(data) {
+    console.log("answer: ", data);
+    receivingTemp = true;
+    socket.emit('answer', answer);
+    // on();
+  });
+
+  socket.on('correctSubscriber', function(data) {
+    console.log("user is correct: ", data);
+    receivingTemp = true;
+    socket.emit('correct', correct);
+    // on();
+  });
+
+  socket.on('wrongSubscriber', function(data) {
+    console.log("user is wrong: ", data);
+    receivingTemp = true;
+    socket.emit('wrong', wrong);
     // on();
   });
 
