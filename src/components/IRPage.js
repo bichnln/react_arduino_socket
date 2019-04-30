@@ -10,6 +10,9 @@ class IRPage extends React.Component{
       current: 'james',
       level: '0',
       answer: '0',
+      wrong: true,
+      combo: '0',
+      command: '',
       players: [{
         _id: '1',
         name: 'player',
@@ -35,6 +38,7 @@ class IRPage extends React.Component{
       console.log(data);
         this.setState({
           level: data,
+          wrong: false
         })
     });
     this.socket.emit('correctSubscriber');
@@ -43,9 +47,18 @@ class IRPage extends React.Component{
       console.log(data);
         this.setState({
           level: data,
+          wrong: true
         })
     });
     this.socket.emit('wrongSubcriber');
+
+    this.socket.on('combo', (data) => {
+      console.log(data);
+        this.setState({
+          combo: data
+        })
+    });
+    this.socket.emit('comboSubcriber');
 
     axios.get('/player')
     .then((response) => {
@@ -63,7 +76,7 @@ class IRPage extends React.Component{
     // this.socket.emit('on', {my: 'data'});
     // console.log('html toggle firing');
     axios.post('/player',{
-      name: this.state.name,
+      name: this.state.current,
       level: this.state.level
     })
 
@@ -77,6 +90,27 @@ class IRPage extends React.Component{
     }
   }
 
+  onCommandText = (e) => {
+    const command = e.target.value;
+    this.setState(() => ({
+        command
+      }));
+  }
+
+  onCommand = (e) => {
+    e.preventDefault();
+    this.socket.emit('command', {command: this.state.command});
+  }
+
+  renderMe = () => {
+    if (this.state.wrong) {
+        return (
+          <td>yes</td>
+        )
+      }
+    return  <td>no</td>;
+
+  }
 
   render() {
     return (
@@ -91,18 +125,44 @@ class IRPage extends React.Component{
         </div>
         <div className="content-container">
 
-          <p>Current Player: {this.state.current}</p>
-          <p>Game Level: {this.state.level}</p>
-          <p>Correct Answer: {this.state.answer} </p>
-          <p>Combo Count : 1/3 </p>
-          {
-            // I define the current player
-            // I will receive game level
-            // i will recieve correct answer with level
-            // I will receive wrong answer with level
-          }
+        <table>
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Current Player: </td>
+            <td>{this.state.current}</td>
+          </tr>
+          <tr>
+            <td>Game Level:  </td>
+            <td> {this.state.level} </td>
+          </tr>
+          <tr>
+            <td>Correct Answer:</td>
+            <td>{this.state.answer} </td>
+          </tr>
+          <tr>
+            <td>Was the user correct? :</td>
+            {
+              this.state.combo > 0 ?
+                this.renderMe()  : ' Starting... '
+            }
+          </tr>
+          <tr>
+            <td>Current Combo:</td>
+            <td>{this.state.combo} </td>
+          </tr>
+        </tbody>
+      </table>
 
         <button onClick={this.onClick}>Save Game Progress</button>
+        <input type="text" onChange={this.onCommandText} value={this.state.command} id=""/>
+        <button className="button" onClick={this.onCommand} > Cmd </button>
+
         </div>
 
         <div className="content-container">

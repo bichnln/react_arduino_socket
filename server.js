@@ -29,6 +29,7 @@ let receivingPlayer = false;
 let correct = 0;
 let wrong = 0;
 let answer = 0;
+let combo = 1;
 
 
 // let on = () => {
@@ -59,19 +60,31 @@ io.on('connection', function (socket) {
     let captureData = recieveData.split(':');
 
     if (captureData[0] == "temp") {
+      console.log("I received a temp");
       socket.emit('currentTemp', captureData[1]);
     }
 
     if (captureData[0] == "answer") {
-      socket.emit('currentTemp', captureData[1]);
+      console.log("I received a answer");
+
+      socket.emit('answer', captureData[1]);
+    }
+
+    if (captureData[0] == "combo") {
+      console.log("I received a combo");
+
+      socket.emit('combo', captureData[1]);
     }
 
     if (captureData[0] == "correct") {
-      socket.emit('currentTemp', captureData[1]);
+      console.log("I received a correct");
+
+      socket.emit('correct', captureData[1]);
     }
 
     if (captureData[0] == "wrong") {
-      socket.emit('currentTemp', captureData[1]);
+      console.log("I received a wrong");
+      socket.emit('wrong', captureData[1]);
     }
 
     // if (receivingTemp) {
@@ -110,6 +123,13 @@ io.on('connection', function (socket) {
     console.log("user is wrong: ", data);
     receivingTemp = true;
     socket.emit('wrong', wrong);
+    // on();
+  });
+
+  socket.on('comboSubcriber', function(data) {
+    console.log("user received a combo: ", data);
+    receivingTemp = true;
+    socket.emit('combo', combo);
     // on();
   });
 

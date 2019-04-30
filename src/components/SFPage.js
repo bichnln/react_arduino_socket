@@ -53,6 +53,7 @@ class SMPage extends React.Component{
       }));
   }
 
+
   onTextInput = (e) => {
     const setTemp = e.target.value;
     this.setState(() => ({
