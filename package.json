@@ -1,11 +1,11 @@
 {
-  "name": "Boiler_Plate",
+  "name": "group_assigment",
   "author": {
     "name": "James Herrero",
     "email": "jamesherrero@gmail.com"
   },
   "version": "1.0.0",
-  "description": "Boiler Plate",
+  "description": "Group assigment code, this should be not be used in any live production and is not a good example of good practice",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
