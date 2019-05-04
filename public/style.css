@@ -94,6 +94,22 @@ input {
     font-size: 1.8rem;
 }
 
+.database-title {
+  padding: 10px;
+  border: 1px solid #cacccd;
+}
+
+.flex {
+  display: flex;
+}
+
+select {
+  border: 1px solid #cacccd;
+  height: 50px;
+  padding: 1.2rem;
+  font-size: 1.8rem;
+}
+
 table {
   font-family: Verdana;
   font-size: 14px;

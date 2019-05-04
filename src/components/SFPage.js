@@ -9,10 +9,11 @@ class SMPage extends React.Component{
     super(props);
 
     this.state = {
-      currentTemp: 'not set',
+      currentTemp: '0',
       status: 'off',
       setTemp: '30.00',
-      command: ''
+      command: '',
+      temps: []
     }
 
     this.socket = io();
@@ -33,9 +34,17 @@ class SMPage extends React.Component{
     });
     this.socket.emit('fanSubscriber');
 
+    axios.get('/fan')
+    .then((response) => {
+       console.log('response ', response.data);
+          this.setState(({
+            temps: response.data
+          }));
+    })
   }
 
-  onClick = (e) => {
+  onDBpush = (e) => {
+    e.preventDefault();
     this.socket.emit('on', {my: 'data'});
     console.log('html toggle firing');
     // testing if arduino can recieve data
@@ -44,6 +53,13 @@ class SMPage extends React.Component{
       temp: this.state.currentTemp,
       status: this.state.status
     });
+    axios.get('/fan')
+    .then((response) => {
+       console.log('response ', response.data);
+          this.setState(({
+            temps: response.data
+          }));
+    })
   }
 
   onCommandText = (e) => {
@@ -125,12 +141,28 @@ class SMPage extends React.Component{
                 <button className="button" onClick={this.onCommand} > Cmd </button>
                 </div>
                 <div>
-                <button className="button" onClick={this.onClick}> UpdateDB </button>
+                <button className="button" onClick={this.onDBpush}> UpdateDB </button>
                 </div>
 
               </form>
         </div>
+
+        <div className="content-container flex">
+
+
+        <div>
+          <h3 className="database-title">Stored Temps</h3>
+          {
+            this.state.temps.map((temp, index) => (
+                <div className="list-item" key={index}>
+                  <p>Temp: {temp.temp}</p>
+                  <p>Status: {temp.status}</p>
+                </div>
+              ))
+          }
+        </div>
       </div>
+        </div>
     )
   }
 }

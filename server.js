@@ -29,7 +29,7 @@ let receivingPlayer = false;
 let correct = 0;
 let wrong = 0;
 let answer = 0;
-let combo = 1;
+let combo = 0;
 
 
 // let on = () => {
@@ -154,8 +154,8 @@ io.on('connection', function (socket) {
 app.post('/fan', (req, res) => {
   console.log(req.body.text);
   var fan = new Fan({
-      status: 'status',
-      temp: 'temp'
+      status: req.body.status,
+      temp: req.body.temp
   });
 
   fan.save().then((doc) => {
@@ -165,7 +165,15 @@ app.post('/fan', (req, res) => {
   });
 });
 
+app.get('/fan', (req, res) => {
+  console.log('api working');
+  Fan.find().then((temp) => {
+    res.send(temp);
+  })
+})
+
 app.get('/player', (req, res) => {
+  console.log('api working');
   Player.find().then((players) => {
     res.send(players);
   })

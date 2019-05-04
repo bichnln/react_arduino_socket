@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 
-class IRPage extends React.Component{
+class IRPageTest extends React.Component{
 
   constructor(props){
     super(props);
@@ -11,7 +11,7 @@ class IRPage extends React.Component{
       level: '0',
       answer: '0',
       wrong: true,
-      combo: 0,
+      combo: '0',
       command: '',
       players: [{
         _id: '1',
@@ -80,6 +80,14 @@ class IRPage extends React.Component{
       level: this.state.level
     })
 
+    axios.get('/player')
+    .then((response) => {
+       console.log('response ', response.data);
+          this.setState(({
+            players: response.data
+          }));
+    })
+
   }
 
   onDropDownChange = (e) => {
@@ -117,18 +125,17 @@ class IRPage extends React.Component{
       <div>
         <div className="content-container">
         <div className="page-header">
-            <h1 className="page-header__title">IR Remote Control</h1>
+            <h1 className="page-header__title">IR RemoteT Control</h1>
             <button onClick={() => {
               this.props.history.push('/SFpage')
             }}>Move to Smart Fan Page </button>
 
             <button onClick={() => {
-              this.props.history.push('/')
-            }}>Move to TEST IR Fan Page </button>
+              this.props.history.push('/IRpage')
+            }}>Move to Main IR Fan Page </button>
           </div>
-
         </div>
-        <div className="content-container">
+        <div className="content-container flex">
 
         <table>
         <thead>
@@ -164,14 +171,7 @@ class IRPage extends React.Component{
         </tbody>
       </table>
 
-        <button onClick={this.onClick}>Save Game Progress</button>
-        <input type="text" onChange={this.onCommandText} value={this.state.command} id=""/>
-        <button className="button" onClick={this.onCommand} > Cmd </button>
-
-        </div>
-
-        <div className="content-container">
-          <h3>Select player</h3>
+      <div className="save">
           <select id="selectPlayer" onChange={this.onDropDownChange}>
             {
               this.state.names.map((name) => (
@@ -186,6 +186,22 @@ class IRPage extends React.Component{
                 ))
             }
           </select>
+          <button className="button" onClick={this.onClick}>Save Game Progress</button>
+
+        </div>
+        <form >
+
+          <div classinName="form-container">
+          <input type="text" onChange={this.onCommandText} value={this.state.command} id=""/>
+          <button className="button" onClick={this.onCommand} > Cmd </button>
+          </div>
+        </form>
+
+
+        </div>
+
+        <div className="content-container flex">
+
 
           <div>
             <h3 className="database-title">Previously Played</h3>
@@ -197,7 +213,7 @@ class IRPage extends React.Component{
                   </div>
                 ))
             }
-            </div>
+          </div>
         </div>
 
       </div>
@@ -205,4 +221,4 @@ class IRPage extends React.Component{
   }
 }
 
-export default IRPage;
+export default IRPageTest;
