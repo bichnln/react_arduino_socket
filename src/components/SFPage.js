@@ -18,7 +18,9 @@ class SMPage extends React.Component{
       status: 'off',
       setTemp: '30.00',
       command: '',
-      temps: []
+      temps: [],
+      localWeather: '',
+      test: ''
     }
 
     this.socket = io();
@@ -48,6 +50,21 @@ class SMPage extends React.Component{
             temps: response.data
           }));
     })
+
+
+    // Fetch Current Weather from External API
+    axios.get('http://api.openweathermap.org/data/2.5/forecast?id=524901&APPID=dbe69186d5808b42e9621aac14409150')
+    .then((data) => {
+      console.log('THIS IS WORKING API', data);
+      this.setState(({
+        localWeather: (data.data.list[0].main.temp - 273.15),
+        test: 'fuck off'
+      }))
+    })
+    .catch((e)=> {
+      console.log('error: ', e);
+    })
+
   }
 
   // Update Database, Post new fan data
@@ -124,6 +141,10 @@ class SMPage extends React.Component{
                 </tr>
               </thead>
               <tbody>
+                <tr>
+                  <td>Local Temp Melbourne: </td>
+                  <td>{ this.state.localWeather }</td>
+                </tr>
                 <tr>
                   <td>Current Temp: </td>
                   <td>{ this.state.currentTemp }</td>
