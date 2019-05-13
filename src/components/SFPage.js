@@ -1,3 +1,8 @@
+//
+//  // Smart Fan Website.
+//
+
+
 import React from 'react';
 import axios from 'axios';
 
@@ -18,6 +23,7 @@ class SMPage extends React.Component{
 
     this.socket = io();
 
+    // Subscription to Temp
     this.socket.on('currentTemp', (temp) => {
       console.log(temp);
       if (parseFloat(temp) >= parseFloat(this.state.setTemp)){
@@ -34,6 +40,7 @@ class SMPage extends React.Component{
     });
     this.socket.emit('fanSubscriber');
 
+    // Fetch all fan data from database
     axios.get('/fan')
     .then((response) => {
        console.log('response ', response.data);
@@ -43,6 +50,7 @@ class SMPage extends React.Component{
     })
   }
 
+  // Update Database, Post new fan data
   onDBpush = (e) => {
     e.preventDefault();
     this.socket.emit('on', {my: 'data'});
@@ -87,11 +95,13 @@ class SMPage extends React.Component{
     this.socket.emit('setTemp', {temp: this.state.setTemp});
   }
 
+  // Send Command to begin taking temprature data
   onCommand = (e) => {
     e.preventDefault();
     this.socket.emit('command', {command: this.state.command});
   }
 
+  // Render HTML
   render() {
     return (
       <div>

@@ -10,4 +10,4 @@
 
 # Considerations
 
-  Please be considerate when judging this code implementation,
+  Please be considerate when judging this code implementation.

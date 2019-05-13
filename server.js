@@ -1,4 +1,6 @@
 /* eslint-disable */
+
+// NOSQL & SOCKETIO & MONGOOSE SETUP
 const {mongoose} = require('./server/mongoose');
 const {Fan} = require('./server/fan');
 const {Player} = require('./server/player');
@@ -9,10 +11,18 @@ const path = require('path');
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
+
+
+/// SERIAL LIBARY & SETUP
 const Readline = SerialPort.parsers.Readline
+// DEFINE COM PORT or /dev/TTYACM0
 const portName = process.argv[2];
+// READ SERIAL CORRECTLY
 const port = new SerialPort(portName, { baudRate: 9600 });
+// PARSE DATA
 const parser = new Readline()
+
+// SERVER LIBRARY & SETUP
 const publicPath = path.join(__dirname, 'public');
 var app = express();
 var server = http.createServer(app)
@@ -21,8 +31,6 @@ app.use(express.static(publicPath));
 app.use(bodyParser.json());
 port.pipe(parser)
 
-// Socket IO
-// Allows us to send & receive data directly to the website
 let currentTemp = 0;
 let receivingTemp = false;
 let receivingPlayer = false;
@@ -32,56 +40,48 @@ let answer = 0;
 let combo = 0;
 
 
-// let on = () => {
-//   port.write('1');
-// }
-
-// - Reading Sockets here
+// Reading Sockets
 io.on('connection', function (socket) {
-  // socket.emit('join', { message: 'handshake confirmed' });
-  // Lets open a serial connection
+  // Establish Serial Connection & Confirm
   port.on("open", () => {
     console.log("connection made");
   })
 
-  // // testing to see if we can send long strings
-  // // serail_read_write.ino
-  // socket.on("click", () => {  // socket activate
-  //   console.log('click is firing');
-  //   port.write("Clicked!!,"); // send through serial
-  // })
-
-  // port.write('this is from node,');
-
-  // catch received serials
+  // Reading Serial Connections
   parser.on('data', (recieveData) => {
     console.log('receivedData:', recieveData);
 
+    // Take Data and Split it
     let captureData = recieveData.split(':');
 
+    // Analog temp sensor data
     if (captureData[0] == "temp") {
       console.log("I received a temp");
       socket.emit('currentTemp', captureData[1]);
     }
 
+    // What is the correct answer? IR Data
     if (captureData[0] == "answer") {
       console.log("I received a answer");
 
       socket.emit('answer', captureData[1]);
     }
 
+    // Combo Data IR Data
     if (captureData[0] == "combo") {
       console.log("I received a combo");
 
       socket.emit('combo', captureData[1]);
     }
 
+    // User Answered Correctly, IR DATA
     if (captureData[0] == "correct") {
       console.log("I received a correct");
 
       socket.emit('correct', captureData[1]);
     }
 
+    // User Answered Incorrectly, IR DATA
     if (captureData[0] == "wrong") {
       console.log("I received a wrong");
       socket.emit('wrong', captureData[1]);
@@ -97,7 +97,7 @@ io.on('connection', function (socket) {
     // }
   });
 
-  // listen
+  // Subscription to temp data
   socket.on('fanSubscriber', function(data) {
     console.log("subscribed to current temp", data);
     receivingTemp = true;
@@ -105,6 +105,7 @@ io.on('connection', function (socket) {
     // on();
   });
 
+  // Subscription to IR data
   socket.on('answerSubscriber', function(data) {
     console.log("answer: ", data);
     receivingTemp = true;

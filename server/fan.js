@@ -1,8 +1,8 @@
 /* eslint-disable */
 var mongoose = require('mongoose');
 
-// create model - Todo model. - mongoose model
-// this pre-defines the collection.
+
+// Mongoose allows us to define a Schema for our Mongodb
 var Fan = mongoose.model(`Fan`, {
     status: {
       type: String,

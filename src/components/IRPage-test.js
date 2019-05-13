@@ -1,3 +1,7 @@
+//
+//  // Website used for Demoing, shows correct answer.
+//
+
 import React from 'react';
 import axios from 'axios';
 
@@ -22,11 +26,12 @@ class IRPageTest extends React.Component{
         'james', 'eamon', 'june', 'mitch'
       ]
     }
-    // https://stackoverflow.com/questions/9418697/how-to-unsubscribe-from-a-socket-io-subscription
-    this.socket = io();
-    this.socket.removeAllListeners('fanSubscriber');
 
-    this.socket.on('answer', (data) => {
+    // Connect to Socket IO
+    this.socket = io();
+    this.socket.removeAllListeners('fanSubscriber');  // removes subscriptions
+
+    this.socket.on('answer', (data) => {  // listen for subscription
       console.log(data);
         this.setState({
           answer: data,
@@ -34,7 +39,7 @@ class IRPageTest extends React.Component{
     });
     this.socket.emit('answerSubscriber');
 
-    this.socket.on('correct', (data) => {
+    this.socket.on('correct', (data) => {  // listen for subscription
       console.log(data);
         this.setState({
           level: data,
@@ -43,7 +48,7 @@ class IRPageTest extends React.Component{
     });
     this.socket.emit('correctSubscriber');
 
-    this.socket.on('wrong', (data) => {
+    this.socket.on('wrong', (data) => {  // listen for subscription
       console.log(data);
         this.setState({
           level: data,
@@ -52,7 +57,7 @@ class IRPageTest extends React.Component{
     });
     this.socket.emit('wrongSubcriber');
 
-    this.socket.on('combo', (data) => {
+    this.socket.on('combo', (data) => { // listen for subscription
       console.log(data);
         this.setState({
           combo: data
@@ -60,6 +65,8 @@ class IRPageTest extends React.Component{
     });
     this.socket.emit('comboSubcriber');
 
+
+    // Call API to fetch from database
     axios.get('/player')
     .then((response) => {
        console.log('response ', response.data);
@@ -72,6 +79,7 @@ class IRPageTest extends React.Component{
     });
   }
 
+  // Add Players to database using API
   onClick = (e) => {
     // this.socket.emit('on', {my: 'data'});
     // console.log('html toggle firing');
@@ -80,6 +88,7 @@ class IRPageTest extends React.Component{
       level: this.state.level
     })
 
+    // Update the list of players with new date, as we have just added a player
     axios.get('/player')
     .then((response) => {
        console.log('response ', response.data);
@@ -105,11 +114,13 @@ class IRPageTest extends React.Component{
       }));
   }
 
+  // Sends Commands to Start IR Fan
   onCommand = (e) => {
     e.preventDefault();
     this.socket.emit('command', {command: this.state.command});
   }
 
+  // Display logic
   renderMe = () => {
     if (this.state.wrong) {
         return (
@@ -120,6 +131,7 @@ class IRPageTest extends React.Component{
 
   }
 
+  // Render HTML
   render() {
     return (
       <div>
