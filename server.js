@@ -2,6 +2,8 @@
 
 // NOSQL & SOCKETIO & MONGOOSE SETUP
 const {mongoose} = require('./server/mongoose');
+const {Enter} = require('./server/enter');
+const {Exit} = require('./server/enter');
 const {Fan} = require('./server/fan');
 const {Player} = require('./server/player');
 const {ObjectId} = require('mongodb');
@@ -11,16 +13,7 @@ const path = require('path');
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
-
-
-/// SERIAL LIBARY & SETUP
-const Readline = SerialPort.parsers.Readline
-// DEFINE COM PORT or /dev/TTYACM0
-const portName = process.argv[2];
-// READ SERIAL CORRECTLY
-const port = new SerialPort(portName, { baudRate: 9600 });
-// PARSE DATA
-const parser = new Readline()
+const moment = require('moment');
 
 // SERVER LIBRARY & SETUP
 const publicPath = path.join(__dirname, 'public');
@@ -29,129 +22,80 @@ var server = http.createServer(app)
 var io = socketIO(server);
 app.use(express.static(publicPath));
 app.use(bodyParser.json());
-port.pipe(parser)
 
-let currentTemp = 0;
-let receivingTemp = false;
-let receivingPlayer = false;
-let correct = 0;
-let wrong = 0;
-let answer = 0;
-let combo = 0;
+// JOHNNY-FIVE CODE
+var five = require('johnny-five');
+var board = five.Board();
 
+board.on('ready', function() {
 
-// Reading Sockets
-io.on('connection', function (socket) {
-  // Establish Serial Connection & Confirm
-  port.on("open", () => {
-    console.log("connection made");
-  })
+  //http://johnny-five.io/api/button/
+  //http://johnny-five.io/examples/led/
 
-  // Reading Serial Connections
-  parser.on('data', (recieveData) => {
-    console.log('receivedData:', recieveData);
+  // THIS IS THE SETUP SECTION
+  var led = new five.Led(8); // Set pin 13 for LED
+  var button = new five.Button(2); // button
 
-    // Take Data and Split it
-    let captureData = recieveData.split(':');
+  // Reading Sockets
+  io.on('connection', function (socket) {
 
-    // Analog temp sensor data
-    if (captureData[0] == "temp") {
-      console.log("I received a temp");
-      socket.emit('currentTemp', captureData[1]);
-    }
+    // WRITE YOU LOGIC HERE
+    button.on("hold", function() {
+      console.log( "Button held" );
+    });
 
-    // What is the correct answer? IR Data
-    if (captureData[0] == "answer") {
-      console.log("I received a answer");
+    button.on("press", function() {
+      console.log( "Button pressed" );
+      led.on();
+    });
 
-      socket.emit('answer', captureData[1]);
-    }
+    button.on("release", function() {
+      console.log( "Button released" );
+      led.off();
+    });
 
-    // Combo Data IR Data
-    if (captureData[0] == "combo") {
-      console.log("I received a combo");
+    // // Subscription to temp data
+    // socket.on('testExample', function(data) {
+    //   console.log('I received data from website', data)
+    // });
 
-      socket.emit('combo', captureData[1]);
-    }
+    // socket.emit('exampleDataRecieved', {});
 
-    // User Answered Correctly, IR DATA
-    if (captureData[0] == "correct") {
-      console.log("I received a correct");
-
-      socket.emit('correct', captureData[1]);
-    }
-
-    // User Answered Incorrectly, IR DATA
-    if (captureData[0] == "wrong") {
-      console.log("I received a wrong");
-      socket.emit('wrong', captureData[1]);
-    }
-
-    // if (receivingTemp) {
-    //   currentTemp = recieveData;
-    //   // console.log(`socket.emit('currentTemp')`);
-    // }
-
-    // if (receivingPlayer) {
-    //   // i need logic
-    // }
-  });
-
-  // Subscription to temp data
-  socket.on('fanSubscriber', function(data) {
-    console.log("subscribed to current temp", data);
-    receivingTemp = true;
-    socket.emit('currentTemp', currentTemp);
-    // on();
-  });
-
-  // Subscription to IR data
-  socket.on('answerSubscriber', function(data) {
-    console.log("answer: ", data);
-    receivingTemp = true;
-    socket.emit('answer', answer);
-    // on();
-  });
-
-  socket.on('correctSubscriber', function(data) {
-    console.log("user is correct: ", data);
-    receivingTemp = true;
-    socket.emit('correct', correct);
-    // on();
-  });
-
-  socket.on('wrongSubscriber', function(data) {
-    console.log("user is wrong: ", data);
-    receivingTemp = true;
-    socket.emit('wrong', wrong);
-    // on();
-  });
-
-  socket.on('comboSubcriber', function(data) {
-    console.log("user received a combo: ", data);
-    receivingTemp = true;
-    socket.emit('combo', combo);
-    // on();
-  });
-
-  socket.on('setTemp',  function(data){
-    const value = data.temp;
-    port.write( value + ',');
-  });
-
-  socket.on('command',  function(data){
-    const value = data.command;
-    port.write( value + ',');
-  });
-
-
-  //Do something with received serial coms
-  const onData = (recieveData) => {
-
-  }
 });
 
-//  ----- Don't touch below this line
+});
+
+/////////  ----- DATABASE CODE
+app.post('/enter', (req, res) => {
+  // console.log(moment(Date.now()));
+  var enter = new Enter({
+      time: moment(),
+      count: '100',
+      status: 'on'
+  });
+
+  enter.save().then((doc) => {
+      res.send(doc);
+  }, (e) => {
+      res.status(400).send(e);
+  });
+});
+
+app.post('/exit', (req, res) => {
+  // console.log(moment(Date.now()));
+  var enter = new Enter({
+      time: moment(),
+      count: 'exit data',
+      status: 'on'
+  });
+
+  enter.save().then((doc) => {
+      res.send(doc);
+  }, (e) => {
+      res.status(400).send(e);
+  });
+});
+
 app.post('/fan', (req, res) => {
   console.log(req.body.text);
   var fan = new Fan({
@@ -200,5 +144,5 @@ app.get('*', function (req, res) {
 });
 
 server.listen(8080, () => {
-  console.log("Running on local host ");
+  console.log("Local host live on 8080");
 });

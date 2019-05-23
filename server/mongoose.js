@@ -7,7 +7,7 @@ var mongoose = require(`mongoose`);
 mongoose.Promise = global.Promise;
 
 // Local Host connection
-mongoose.connect(`mongodb://localhost:27017/NoName`, { useMongoClient: true });
+mongoose.connect(`mongodb://localhost:27017/TeamTemplate`, { useMongoClient: true });
 
 module.exports = {
     mongoose

@@ -5,4 +5,3 @@ import './styles/styles.scss';
 import AppRouter from './router/AppRouter';
 
 ReactDom.render(<AppRouter />, document.getElementById('app'));
-

@@ -2,8 +2,11 @@
 //  // Smart Fan Website.
 //
 
+// SMART FAN TEMPLATE
 
 import React from 'react';
+
+// USE THIS FOR API
 import axios from 'axios';
 
 // import fanSubscriber from '../../subcriptions/fanSubscription';
@@ -14,19 +17,13 @@ class SMPage extends React.Component{
     super(props);
 
     this.state = {
-      currentTemp: '0',
-      status: 'off',
-      setTemp: '30.00',
-      command: '',
-      temps: [],
-      localWeather: '',
-      test: ''
+      onCommand: ''
     }
 
     this.socket = io();
 
     // Subscription to Temp
-    this.socket.on('currentTemp', (temp) => {
+    this.socket.on('exampleDataRecieved', (temp) => {
       console.log(temp);
       if (parseFloat(temp) >= parseFloat(this.state.setTemp)){
         this.setState({
@@ -40,7 +37,9 @@ class SMPage extends React.Component{
         })
       }
     });
-    this.socket.emit('fanSubscriber');
+
+    // this.socket.emit()
+    this.socket.emit('testExample');
 
     // Fetch all fan data from database
     axios.get('/fan')
@@ -51,20 +50,6 @@ class SMPage extends React.Component{
           }));
     })
 
-
-    // Fetch Current Weather from External API
-    axios.get('http://api.openweathermap.org/data/2.5/forecast?id=524901&APPID=dbe69186d5808b42e9621aac14409150')
-    .then((data) => {
-      console.log('THIS IS WORKING API', data);
-      this.setState(({
-        localWeather: (data.data.list[0].main.temp - 273.15),
-        test: 'fuck off'
-      }))
-    })
-    .catch((e)=> {
-      console.log('error: ', e);
-    })
-
   }
 
   // Update Database, Post new fan data
@@ -72,127 +57,58 @@ class SMPage extends React.Component{
     e.preventDefault();
     this.socket.emit('on', {my: 'data'});
     console.log('html toggle firing');
-    // testing if arduino can recieve data
-    // this.socket.emit('click');
+
+    // Example of pushing data to the database
     axios.post('/fan', {
-      temp: this.state.currentTemp,
-      status: this.state.status
+      temp: this.state.onCommand,
+      status: this.state.onCommand
     });
+
+    // Example of fetching data from database
     axios.get('/fan')
     .then((response) => {
-       console.log('response ', response.data);
+       console.log('response ', response.data);  // This is the data we receive !!
+
+          // Within this example we are actually save the data we recieve to the current state
           this.setState(({
             temps: response.data
           }));
     })
   }
 
-  onCommandText = (e) => {
-    const command = e.target.value;
-    this.setState(() => ({
-        command
-      }));
-  }
-
-
   onTextInput = (e) => {
-    const setTemp = e.target.value;
+    const input = e.target.value;
     this.setState(() => ({
-        setTemp
+        onCommand: input
       }));
   }
 
-  onSubmit = (e) => {
+  sendCmdToServer = (e) => {
     e.preventDefault();
-    if (this.state.currentTemp >= this.state.setTemp) {
-      this.setState(() => ({
-        status: 'on'
-      }))
-    }
-    this.socket.emit('setTemp', {temp: this.state.setTemp});
+
+    this.socket.emit('command', {command: this.state.onCommand});
   }
 
   // Send Command to begin taking temprature data
   onCommand = (e) => {
     e.preventDefault();
-    this.socket.emit('command', {command: this.state.command});
+    this.socket.emit('command', {command: this.state.onCommand});
   }
 
   // Render HTML
   render() {
     return (
       <div>
-          <div className="content-container">
-            <div className="page-header">
-              <h1 className="page-header__title">Smart Fan Controller</h1>
-              <button onClick={() => {
-                this.props.history.push('/')
-              }}>Move to IR Remote Controller </button>
-            </div>
-          </div>
-
-          <div className="content-container">
-
-              <table>
-              <thead>
-                <tr>
-                  <th>Description</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Local Temp Melbourne: </td>
-                  <td>{ this.state.localWeather }</td>
-                </tr>
-                <tr>
-                  <td>Current Temp: </td>
-                  <td>{ this.state.currentTemp }</td>
-                </tr>
-                <tr>
-                  <td>Threshold Temp: </td>
-                  <td>{ this.state.setTemp } </td>
-                </tr>
-                <tr>
-                  <td>Fan Status: </td>
-                  <td>{ this.state.status } </td>
-                </tr>
-              </tbody>
-            </table>
+              <h1>Template</h1>
 
 
               <form action="onSubmit">
-
                 <div>
-                <input type="text" onChange={this.onTextInput} value={this.state.setTemp} id=""/>
-                <button className="button" onClick={this.onSubmit} > SetT </button>
+                <input type="text" onChange={this.onTextInput} value={this.state.onCommand} id=""/>
+                <button onClick={this.sendCmdToServer} > Send String Command Example </button>
                 </div>
-                <div>
-                <input type="text" onChange={this.onCommandText} value={this.state.command} id=""/>
-                <button className="button" onClick={this.onCommand} > Cmd </button>
-                </div>
-                <div>
-                <button className="button" onClick={this.onDBpush}> UpdateDB </button>
-                </div>
-
               </form>
-        </div>
 
-        <div className="content-container flex">
-
-
-        <div>
-          <h3 className="database-title">Stored Temps</h3>
-          {
-            this.state.temps.map((temp, index) => (
-                <div className="list-item" key={index}>
-                  <p>Temp: {temp.temp}</p>
-                  <p>Status: {temp.status}</p>
-                </div>
-              ))
-          }
-        </div>
-      </div>
         </div>
     )
   }
