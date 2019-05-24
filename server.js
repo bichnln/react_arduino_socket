@@ -24,35 +24,76 @@ app.use(express.static(publicPath));
 app.use(bodyParser.json());
 
 // JOHNNY-FIVE CODE
-var five = require('johnny-five');
+var five = require("johnny-five");
+
 var board = five.Board();
 
 board.on('ready', function() {
 
   //http://johnny-five.io/api/button/
   //http://johnny-five.io/examples/led/
+  //http://johnny-five.io/examples/led-rgb/
+  //http://johnny-five.io/examples/photoresistor/
+
 
   // THIS IS THE SETUP SECTION
   var led = new five.Led(8); // Set pin 13 for LED
   var button = new five.Button(2); // button
+  var rgb = new five.Led.RGB({  // RGB
+    pins: {
+      red: 5,
+      green: 6,
+      blue: 7
+    }
+  });
+
+  // var photoresistor = new five.Sensor({  // Photresistor
+  //   pin: "A2",
+  //   freq: 250
+  // });
 
   // Reading Sockets
   io.on('connection', function (socket) {
 
-    // WRITE YOU LOGIC HERE
+    board.repl.inject({
+      pot: photoresistor
+    });
+
+    photoresistor.on("data", function() {
+      console.log(this.value);
+    });
+
+    // WRITE YOU LOGIC HERE RGB
     button.on("hold", function() {
       console.log( "Button held" );
+      // rgb.on();
+      // rgb.color("#FF0000"); // RED
+      // rgb.color("#0000FF");  // Green
+      // rgb.color("#0000FF"); // Blue
     });
 
     button.on("press", function() {
       console.log( "Button pressed" );
-      led.on();
     });
 
     button.on("release", function() {
       console.log( "Button released" );
-      led.off();
     });
+
+    // // WRITE YOU LOGIC HERE LED
+    // button.on("hold", function() {
+    //   console.log( "Button held" );
+    // });
+
+    // button.on("press", function() {
+    //   console.log( "Button pressed" );
+    //   led.on();
+    // });
+
+    // button.on("release", function() {
+    //   console.log( "Button released" );
+    //   led.off();
+    // });
 
     // // Subscription to temp data
     // socket.on('testExample', function(data) {
