@@ -3,12 +3,9 @@
 //
 
 // SMART FAN TEMPLATE
-
 import React from 'react';
-
 // USE THIS FOR API
 import axios from 'axios';
-
 // import fanSubscriber from '../../subcriptions/fanSubscription';
 
 class SMPage extends React.Component{
@@ -17,7 +14,9 @@ class SMPage extends React.Component{
     super(props);
 
     this.state = {
-      onCommand: ''
+      onCommand: '',
+      data: [],
+      duration: 0
     }
 
     this.socket = io();
@@ -41,12 +40,20 @@ class SMPage extends React.Component{
     // this.socket.emit()
     this.socket.emit('testExample');
 
+    this.socket.on('duration', (data) => {
+      console.log('website sent me data', data)
+      this.setState(() => ({
+        duration: data.duration
+      }));
+    });
+
+
     // Fetch all fan data from database
-    axios.get('/fan')
-    .then((response) => {
-       console.log('response ', response.data);
-          this.setState(({
-            temps: response.data
+    axios.get('/RGB')
+    .then((data) => {
+       console.log('response ', data);
+          this.setState(() => ({
+            data: data.data
           }));
     })
 
@@ -83,10 +90,19 @@ class SMPage extends React.Component{
       }));
   }
 
-  sendCmdToServer = (e) => {
+  onColorChange = (e) => {
     e.preventDefault();
+    this.socket.emit('color', {color: e.target.value});
+  }
 
-    this.socket.emit('command', {command: this.state.onCommand});
+  onChangeTurnOn = (e) => {
+    e.preventDefault();
+    this.socket.emit('turnOn', {turnOn: false});
+  }
+
+  onChangeTurnOff = (e) => {
+    e.preventDefault();
+    this.socket.emit('turnOff', {turnOff: true});
   }
 
   // Send Command to begin taking temprature data
@@ -99,15 +115,37 @@ class SMPage extends React.Component{
   render() {
     return (
       <div>
-              <h1>Template</h1>
+              <h1>Smart RGB Light</h1>
+              <p>template title</p>
+              <div>
+                <button onClick={this.onChangeTurnOn}>Turn on led</button>
+              </div>
+              <div>
+                <button onClick={this.onChangeTurnOff}>Turn off led</button>
+              </div>
+              <div>
+              <div>
+              <p>set duration</p>
+              <input type="text" onChange={this.onTextInput} value={this.state.onCommand} id=""/>
+              </div>
+                <select onChange={this.onColorChange}>
+                  <option value="#FF0000">Blue</option>
+                  <option value="#0000FF">Red</option>
+                  <option value="#00FF00">Green</option>
+                </select>
+              </div>
 
 
-              <form action="onSubmit">
-                <div>
-                <input type="text" onChange={this.onTextInput} value={this.state.onCommand} id=""/>
-                <button onClick={this.sendCmdToServer} > Send String Command Example </button>
-                </div>
-              </form>
+              {
+                this.state.data.map((data) =>
+                    <div key={data._id}>
+                      <p>_id: {data._id}</p>
+                      <p>date: {data.date}</p>
+                      <p>color: {data.color}</p>
+                      <p>type: {data.type}</p>
+                    </div>
+                )
+              }
 
         </div>
     )

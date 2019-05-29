@@ -5,6 +5,7 @@ const {mongoose} = require('./server/mongoose');
 const {Enter} = require('./server/enter');
 const {Exit} = require('./server/enter');
 const {Fan} = require('./server/fan');
+const {RGB} = require('./server/rgb');
 const {Player} = require('./server/player');
 const {ObjectId} = require('mongodb');
 const bodyParser = require('body-parser');
@@ -28,6 +29,13 @@ var five = require("johnny-five");
 
 var board = five.Board();
 
+let timeOut = 0;
+let duration = 0;
+let color = "#0000FF"  // default green
+let light = false;
+
+
+// Being Repl instance of johnny-five
 board.on('ready', function() {
 
   //http://johnny-five.io/api/button/
@@ -41,72 +49,116 @@ board.on('ready', function() {
   var button = new five.Button(2); // button
   var rgb = new five.Led.RGB({  // RGB
     pins: {
-      red: 5,
-      green: 6,
-      blue: 7
+      red: 13,
+      green: 12,
+      blue: 11
     }
   });
 
-  // var photoresistor = new five.Sensor({  // Photresistor
-  //   pin: "A2",
-  //   freq: 250
-  // });
+
 
   // Reading Sockets
   io.on('connection', function (socket) {
 
-    board.repl.inject({
-      pot: photoresistor
-    });
 
-    photoresistor.on("data", function() {
-      console.log(this.value);
-    });
 
-    // WRITE YOU LOGIC HERE RGB
-    button.on("hold", function() {
-      console.log( "Button held" );
-      // rgb.on();
-      // rgb.color("#FF0000"); // RED
-      // rgb.color("#0000FF");  // Green
-      // rgb.color("#0000FF"); // Blue
-    });
 
+    // Button will simulate PIR sensor
     button.on("press", function() {
-      console.log( "Button pressed" );
+      console.log("press");
+
+
+      light = !light;
+      if (light) {
+        rgb.on();
+        rgb.color(color);
+
+        var rgbData = new RGB({
+          date: moment(Date.now()).format('MMMM Do YYYY, h:mm:ss a'),
+          color: color,
+          type: 'motion sensor'
+        });
+        rgbData.save().then((doc) => {
+          console.log(doc);
+        });
+      } else {
+        rgb.off();
+      }
+
+
+
+
+
     });
 
-    button.on("release", function() {
-      console.log( "Button released" );
-    });
-
-    // // WRITE YOU LOGIC HERE LED
-    // button.on("hold", function() {
-    //   console.log( "Button held" );
-    // });
-
-    // button.on("press", function() {
-    //   console.log( "Button pressed" );
-    //   led.on();
-    // });
-
+    // // Can no longer sense motion
     // button.on("release", function() {
-    //   console.log( "Button released" );
-    //   led.off();
-    // });
+    //   console.log("release");
+    //   rgb.off();
 
-    // // Subscription to temp data
-    // socket.on('testExample', function(data) {
-    //   console.log('I received data from website', data)
-    // });
+    //   }
+    // );
 
-    // socket.emit('exampleDataRecieved', {});
+    // // Subscription to color definition
+    socket.on('color', function(data) {
+      console.log('website sent me data', data)
+      color = data.color;
+    });
+    socket.emit('color');
+
+
+    // // Subscription to color definition
+    socket.on('turnOn', function(data) {
+      console.log('turn on led', data)
+      rgb.on();
+      rgb.color(color);
+      light = true;
+      var rgbData = new RGB({
+        date: moment(Date.now()).format('MMMM Do YYYY, h:mm:ss a'),
+        color: color,
+        type: 'Website Click'
+      });
+      rgbData.save().then((doc) => {
+        console.log(doc);
+      });
+
+    });
+    socket.emit('turnOn');
+
+    socket.on('turnOff', function(data) {
+      console.log('turn off led ', data)
+      light = false;
+      rgb.off();
+    });
+    socket.emit('turnOff');
 
 });
 
 });
 
 /////////  ----- DATABASE CODE
+app.get('/RGB', (req, res) => {
+  console.log('api working');
+  RGB.find().then((data) => {
+    res.send(data);
+  })
+})
+
+app.post('/RGB', (req, res) => {
+  // console.log(moment(Date.now()));
+  var led = new RGB({
+      date: moment(Date.now()),
+      color: color,
+      type: 'api call'
+  });
+
+  led.save().then((doc) => {
+      res.send(doc);
+  }, (e) => {
+      res.status(400).send(e);
+  });
+});
+
 app.post('/enter', (req, res) => {
   // console.log(moment(Date.now()));
   var enter = new Enter({
